@@ -37,11 +37,15 @@ int main()
     goalPosition->set_desired_location(Vec3(0.6, 1.0, 0.0));
     TaskSpace::PriorityLevel * priorityLevel =
         new TaskSpace::PriorityLevel();
-    controller->upd_priority_levels().adoptAndAppend(priorityLevel);
-    priorityLevel->upd_tasks().adoptAndAppend(goalPosition);
+
+    // TODO
+    priorityLevel->addComponent(goalPosition);
+    controller->addComponent(priorityLevel);
 
     // Prepare to simulate.
     // --------------------
+    //
+    /*
     State& initState = model.initSystem();
     RungeKuttaMersonIntegrator integrator(model.getMultibodySystem());
     Manager manager(model, integrator);
@@ -60,6 +64,7 @@ int main()
     model.printControlStorage("fourlinks_controls.sto");
     manager.getStateStorage().print("fourlinks_states.sto");
 
+    */
     model.print("fourlinks_with_controller.osim");
 }
 

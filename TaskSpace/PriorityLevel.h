@@ -3,7 +3,7 @@
 
 #include <OpenSim/Common/Object.h>
 #include <OpenSim/Common/Property.h>
-#include "TaskSet.h"
+#include "Task.h"
 #include "osimTaskSpaceControlDLL.h"
 
 using SimTK::SimbodyMatterSubsystem;
@@ -37,14 +37,14 @@ class Controller;
  * See the corresponding methods for more information.
  *
  */
-class OSIMTASKSPACECONTROL_API PriorityLevel : public OpenSim::Object
+class OSIMTASKSPACECONTROL_API PriorityLevel : public OpenSim::Component
 {
-OpenSim_DECLARE_CONCRETE_OBJECT(TaskSpace::PriorityLevel, OpenSim::Object);
+OpenSim_DECLARE_CONCRETE_OBJECT(TaskSpace::PriorityLevel, OpenSim::Component);
 
 public:
     /** @name Property declarations */
     /**@{**/
-    OpenSim_DECLARE_PROPERTY(tasks, TaskSpace::TaskSet,
+    OpenSim_DECLARE_LIST_PROPERTY(tasks, TaskSpace::Task,
             "All the tasks in this priority level.");
     /**@}**/
 
@@ -177,6 +177,10 @@ public:
      */
     Matrix taskSpaceMassMatrix(const State& s);
 
+protected:
+
+    void connect(Component& root) OVERRIDE_11;
+
 private:
 
     void setModel(const Model& model);
@@ -189,6 +193,9 @@ private:
 
     void setNull();
     void constructProperties();
+
+    void constructInputs() OVERRIDE_11;
+    void constructOutputs() OVERRIDE_11;
 
 };
 

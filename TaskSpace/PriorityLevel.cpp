@@ -1,7 +1,5 @@
 #include "PriorityLevel.h"
 
-#include "TaskSet.h"
-
 #include <OpenSim/Simulation/Model/Model.h>
 
 using SimTK::FactorLU;
@@ -14,7 +12,7 @@ using namespace OpenSim;
 TaskSpace::PriorityLevel::PriorityLevel()
 {
     setNull();
-    constructProperties();
+    constructInfrastructure();
 }
 
 void TaskSpace::PriorityLevel::setNull()
@@ -24,7 +22,26 @@ void TaskSpace::PriorityLevel::setNull()
 
 void TaskSpace::PriorityLevel::constructProperties()
 {
-    constructProperty_tasks(TaskSet());
+    constructProperty_tasks();
+}
+
+void TaskSpace::PriorityLevel::connect(Component& root) OVERRIDE_11
+{
+    Super::connect(root);
+    // TODO
+}
+
+void TaskSpace::PriorityLevel::constructInputs() OVERRIDE_11
+{
+}
+
+void TaskSpace::PriorityLevel::constructOutputs() OVERRIDE_11
+{
+    // TODO generalizedForces->taskSpaceForces.
+    constructOutput<Matrix>("nullspaceProjection",
+            std::bind(&TaskSpace::PriorityLevel::nullspaceProjection,
+                this, std::placeholders::_1),
+            SimTK::Stage::Position);
 }
 
 // TODO this makes no sense. the priority level must collect
@@ -70,13 +87,13 @@ Matrix TaskSpace::PriorityLevel::jacobian(const State& s)
     // Used to write constituent jacobians to the correct place.
     unsigned int STidx = 0;
 
-    for (unsigned int iT = 0; iT < get_tasks().getSize(); iT++)
+    for (unsigned int iT = 0; iT < get_tasks().size(); iT++)
     {
-        unsigned int nST = get_tasks().get(iT).getNumScalarTasks();
+        unsigned int nST = get_tasks()[iT].getNumScalarTasks();
 
         // Write the nST x NU matrix to the (STidx, 0) location.
         levelJacobian.updBlock(STidx, 0, nST, s.getNU()) =
-            get_tasks().get(iT).jacobian(s);
+            get_tasks()[iT].jacobian(s);
 
         STidx += nST;
     }
@@ -141,10 +158,10 @@ void TaskSpace::PriorityLevel::setModel(const Model& model)
     m_model = &model;
 
     m_numScalarTasks = 0;
-    for (unsigned int iT = 0; iT < get_tasks().getSize(); iT++)
+    for (unsigned int iT = 0; iT < get_tasks().size(); iT++)
     {
-        get_tasks().get(iT).setModel(model);
-        m_numScalarTasks += get_tasks().get(iT).getNumScalarTasks();
+        get_tasks()[iT].setModel(model);
+        m_numScalarTasks += get_tasks()[iT].getNumScalarTasks();
     }
 }
 

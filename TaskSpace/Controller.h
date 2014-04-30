@@ -2,7 +2,7 @@
 #define OPENSIM_TASKSPACE_CONTROLLER_H_
 
 #include <OpenSim/Simulation/Control/Controller.h>
-#include "PriorityLevelSet.h"
+#include "PriorityLevel.h"
 #include "osimTaskSpaceControlDLL.h"
 
 namespace OpenSim {
@@ -112,7 +112,8 @@ OpenSim_DECLARE_CONCRETE_OBJECT(TaskSpace::Controller, OpenSim::Controller);
 
 public:
 
-    OpenSim_DECLARE_PROPERTY(priority_levels, OpenSim::TaskSpace::PriorityLevelSet,
+    OpenSim_DECLARE_LIST_PROPERTY(priority_levels,
+            OpenSim::TaskSpace::PriorityLevel,
             "The PriorityLevel's that define this Controller. The priority of "
             "the levels is given by their index in the set. The first item "
             "in the set is the highest priority.");
@@ -125,6 +126,8 @@ public:
             SimTK::Vector& controls) const OVERRIDE_11;
 
 protected:
+
+    void connect(Component& root) OVERRIDE_11;
 
     void connectToModel(Model& model) OVERRIDE_11;
 

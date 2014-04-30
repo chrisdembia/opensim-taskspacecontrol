@@ -30,15 +30,16 @@ class PriorityLevel;
  * the generalized forces detail how the task is achieved.
  *
  */
-class OSIMTASKSPACECONTROL_API Task : public OpenSim::Object
+class OSIMTASKSPACECONTROL_API Task : public OpenSim::Component
 {
-OpenSim_DECLARE_ABSTRACT_OBJECT(TaskSpace::Task, OpenSim::Object);
+OpenSim_DECLARE_ABSTRACT_OBJECT(TaskSpace::Task, OpenSim::Component);
 
 public:
 
     Task()
     {
         setNull();
+        constructInfrastructure();
     }
 
     // -------------------------------------------------------------------------
@@ -144,6 +145,8 @@ public:
 
 protected:
 
+    void connect(Component& root) OVERRIDE_11;
+
     virtual void setModel(const Model& model)
     {
         m_model = &model;
@@ -160,6 +163,8 @@ private:
     {
         m_model = NULL;
     }
+
+    void constructOutputs() OVERRIDE_11;
 
 };
 

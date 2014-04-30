@@ -7,6 +7,24 @@ using SimTK::Vector;
 
 using namespace OpenSim;
 
+void TaskSpace::Task::connect(Component& root) OVERRIDE_11
+{
+    Super::connect(root);
+    // TODO
+}
+
+void TaskSpace::Task::constructOutputs() OVERRIDE_11
+{
+    constructOutput<Matrix>("dynamicallyConsistentJacobianInverse",
+            std::bind(&TaskSpace::Task::dynamicallyConsistentJacobianInverse,
+                this,
+                std::placeholders::_1), SimTK::Stage::Position);
+    constructOutput<Matrix>("taskSpaceMassMatrix",
+            std::bind(&TaskSpace::Task::taskSpaceMassMatrix,
+                this,
+                std::placeholders::_1), SimTK::Stage::Position);
+}
+
 Matrix TaskSpace::Task::dynamicallyConsistentJacobianInverse(const State& s)
     const
 {

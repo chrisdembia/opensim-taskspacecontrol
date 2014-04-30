@@ -1,7 +1,5 @@
 #include "Controller.h"
 
-#include "PriorityLevelSet.h"
-
 using std::string;
 
 using SimTK::Matrix;
@@ -12,12 +10,17 @@ using namespace OpenSim;
 
 TaskSpace::Controller::Controller()
 {
-    constructProperties();
+    constructInfrastructure();
 }
 
 void TaskSpace::Controller::constructProperties()
 {
-    constructProperty_priority_levels(PriorityLevelSet());
+    constructProperty_priority_levels();
+}
+
+void TaskSpace::Controller::connect(Component& root) OVERRIDE_11
+{
+    Super::connect(root);
 }
 
 void TaskSpace::Controller::computeControls(const State& s,
@@ -33,11 +36,11 @@ void TaskSpace::Controller::computeControls(const State& s,
     Vector generalizedForces(s.getNU());
     generalizedForces.setToZero();
 
-    for (unsigned int iP = get_priority_levels().getSize() - 1; iP > 0; iP--)
+    for (unsigned int iP = get_priority_levels().size() - 1; iP > 0; iP--)
     {
         Matrix NT =
-            get_priority_levels().get(iP - 1).nullspaceProjection(s).transpose();
-        Vector Gamma_iP = get_priority_levels().get(iP).generalizedForces(s);
+            get_priority_levels()[iP - 1].nullspaceProjection(s).transpose();
+        Vector Gamma_iP = get_priority_levels()[iP].generalizedForces(s);
 
         generalizedForces = NT * (Gamma_iP + generalizedForces);
     }
@@ -45,7 +48,7 @@ void TaskSpace::Controller::computeControls(const State& s,
     // The highest-priority level doesn't get filtered by a nullspace
     // projection.
     generalizedForces =
-        get_priority_levels().get(0).generalizedForces(s); // TODO + generalizedForces;
+        get_priority_levels()[0].generalizedForces(s); // TODO + generalizedForces;
     std::cout << "DEBUG Controller::computeControls " << generalizedForces << std::endl;
 
     // Send control signals to CoordinateActuator's.
@@ -73,9 +76,9 @@ void TaskSpace::Controller::connectToModel(Model& model)
     // Ensure that the necessary CoordinateActuator's are in the model.
     // TODO
 
-    for (unsigned int iP = 0; iP < get_priority_levels().getSize(); iP++)
+    for (unsigned int iP = 0; iP < get_priority_levels().size(); iP++)
     {
         // TODO rename setModel methods.
-        get_priority_levels().get(iP).setModel(model);
+        get_priority_levels()[iP].setModel(model);
     }
 }
